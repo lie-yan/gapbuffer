@@ -301,12 +301,20 @@ private:
   static constexpr size_type alignment = 8;
 
 public:
-  explicit gap_buffer(size_type n = default_size)
+  explicit gap_buffer(size_type count = default_size)
   {
-    start = allocate_and_construct(n);
-    finish = start + n;
+    count = round_up(count, alignment);
+
+    start = allocate_and_construct(count);
+    finish = start + count;
     gap_start = start;
-    gap_size = n;
+    gap_size = count;
+  }
+
+  gap_buffer(size_type count, const T& value)
+      : gap_buffer(count)
+  {
+    for (size_type i = 0; i < count; ++i) (*this)[i] = value;
   }
 
   template<typename InputIt>
@@ -318,24 +326,24 @@ public:
     start = data_allocator.allocate(len);
     finish = start + len;
 
+    int except_flag = 0;
     try
     {
       gap_start = std::uninitialized_copy(first, last, start);
-    }
-    catch (...)
-    {
-      data_allocator.deallocate(start, finish - start);
-      throw;
-    }
-
-    try
-    {
+      except_flag = 1;
       std::uninitialized_default_construct(gap_start, finish);
     }
     catch (...)
     {
-      std::destroy(start, start + n);
-      data_allocator.deallocate(start, finish - start);
+      switch (except_flag)
+      {
+      case 1:
+        std::destroy(start, start + n);
+        // FALL THROUGH
+      case 0:
+        data_allocator.deallocate(start, finish - start);
+      default:;// DO NOTHING
+      }
       throw;
     }
 
@@ -345,14 +353,11 @@ public:
   gap_buffer(const gap_buffer& rhs)
       : gap_buffer(rhs.begin(), rhs.end()) { }
 
-  void swap(gap_buffer& rhs)
-  {
-    using std::swap;
-    swap(start, rhs.start);
-    swap(finish, rhs.finish);
-    swap(gap_start, rhs.gap_start);
-    swap(gap_size, rhs.gap_size);
-  }
+  gap_buffer(gap_buffer&& rhs) noexcept
+      : gap_buffer() { swap(rhs); }
+
+  gap_buffer(std::initializer_list<T> ilist)
+      : gap_buffer(ilist.begin(), ilist.end()) { }
 
   gap_buffer& operator =(const gap_buffer& rhs)
   {
@@ -361,10 +366,7 @@ public:
     return *this;
   }
 
-  gap_buffer(gap_buffer&& rhs)
-      : gap_buffer() { swap(rhs); }
-
-  gap_buffer& operator =(gap_buffer&& rhs)
+  gap_buffer& operator =(gap_buffer&& rhs) noexcept
   {
     swap(rhs);
     return *this;
@@ -377,41 +379,24 @@ public:
     gap_size = 0;
   }
 
-  friend
-  bool operator ==(const gap_buffer& lhs, const gap_buffer& rhs)
+  void swap(gap_buffer& rhs)
   {
-    return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+    using std::swap;
+    swap(start, rhs.start);
+    swap(finish, rhs.finish);
+    swap(gap_start, rhs.gap_start);
+    swap(gap_size, rhs.gap_size);
   }
 
-  friend
-  bool operator !=(const gap_buffer& lhs, const gap_buffer& rhs)
-  {
-    return !(lhs == rhs);
-  }
+  void assign(size_type count, const T& value) { *this = gap_buffer(count, value); }
 
-  bool operator <(const gap_buffer& rhs) const
-  {
-    auto[left, right] = std::mismatch(begin(), end(), rhs.begin(), rhs.end());
+  template<typename InputIt>
+  void assign(InputIt first, InputIt last) { *this = gap_buffer(first, last); }
 
-    if (right == rhs.end()) return false;
-    else if (left == end()) return true;
-    else return *left < *right;
-  }
+  void assign(std::initializer_list<T> ilist) { *this = gap_buffer(ilist); }
 
-  bool operator >(const gap_buffer& rhs) const
-  {
-    return rhs < *this;
-  }
+  allocator_type get_allocator() const { return data_allocator; }
 
-  bool operator <=(const gap_buffer& rhs) const
-  {
-    return !(rhs < *this);
-  }
-
-  bool operator >=(const gap_buffer& rhs) const
-  {
-    return !(*this < rhs);
-  }
 
   // ------ basis START HERE ------
 
@@ -479,6 +464,7 @@ public:
   void reserve(size_type new_cap = 0)
   {
     if (capacity() >= new_cap) return;
+    if (new_cap > max_size()) throw std::length_error("new_cap should be less than max_size()");
 
     size_type old_size = size();
     size_type old_capacity = capacity();
@@ -493,19 +479,11 @@ public:
     gap_size = finish - gap_start;
   }
 
-  size_type size() const { return finish - start - gap_size; }
-  size_type length() const { return size(); }
-  size_type capacity() const { return finish - start; }
+  size_type size() const noexcept { return finish - start - gap_size; }
+  size_type max_size() const noexcept { return size_type(-1); }
+  size_type capacity() const noexcept { return finish - start; }
 
   // ------ basis END HERE ------
-
-  template<typename InputIt>
-  gap_buffer& assign(InputIt first, InputIt last)
-  {
-    erase(begin(), end());
-    insert(begin(), first, last);
-    return *this;
-  }
 
   reference operator [](size_type pos)
   {
@@ -527,7 +505,7 @@ public:
     );
   }
 
-  const_reference front() const { return operator [](0); }
+  const_reference front() const { return (*this)[0]; }
   reference front()
   {
     return const_cast<reference>(
@@ -535,7 +513,7 @@ public:
     );
   }
 
-  const_reference back() const { return operator [](size() - 1); }
+  const_reference back() const { return (*this)[size() - 1]; }
   reference back()
   {
     return const_cast<reference>(
@@ -543,41 +521,107 @@ public:
     );
   }
 
-  bool empty() const { return size() == 0; }
+  T* data() noexcept  = delete;
+  const T* data() const noexcept = delete;
+
+  [[nodiscard]] bool empty() const noexcept { return size() == 0; }
+
+  void shrink_to_fit() { /*DO NOTHNG*/ }
 
   void clear() { erase(begin(), end()); }
 
-  /// Erases n characters, starting with the i-th element.
-  /// \param i
-  /// \param n
-  void erase(size_type i, size_type n)
+  iterator insert(const_iterator pos, const T& value)
   {
-    Expects(size() >= n);
-    const_iterator first(this, i);
-    erase(first, first + n);
+    return insert(pos, &value, &value + 1);
   }
 
-  /// Inserts the character `c` before the i-th element.
-  /// \param i
-  /// \param c
-  void insert(size_type i, T c)
+  iterator insert(const_iterator pos, T&& value)
   {
-    insert(const_iterator(this, i), &c, &c + 1);
+    return insert(pos, std::make_move_iterator(&value), std::make_move_iterator(&value + 1));
   }
 
-  void push_back(T c) { append(c); }
-  void pop_back() { erase(size() - 1, 1); }
+  iterator insert(const_iterator pos, size_type count, const T& value)
+  {
+    for (size_type i = 0; i < count; ++i)
+      pos = insert(pos, value);
+    return iterator(this, pos.offset);
+  }
 
+  iterator insert(const_iterator pos, std::initializer_list<T> ilist)
+  {
+    return insert(pos, ilist.begin(), ilist.end());
+  }
+
+  void erase(const_iterator pos) { erase(pos, pos + 1); }
+
+  void push_back(const T& value) { insert(end(), &value, &value + 1); }
+  void push_back(T&& value) { insert(end(), std::make_move_iterator(&value), std::make_move_iterator(&value + 1)); }
+  void pop_back() { erase(end() - 1); }
+
+  const_iterator begin() const noexcept { return const_iterator(this); }
+  const_iterator cbegin() const noexcept { return begin(); }
+
+  const_iterator end() const noexcept { return const_iterator(this, size()); }
+  const_iterator cend() const noexcept { return end(); }
+
+  iterator begin() noexcept { return iterator(this); }
+  iterator end() noexcept { return iterator(this, size()); }
+
+  const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
+  const_reverse_iterator crbegin() const noexcept { return rbegin(); }
+
+  const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
+  const_reverse_iterator crend() const noexcept { return rend(); }
+
+  reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+  reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+
+  friend
+  bool operator ==(const gap_buffer& lhs, const gap_buffer& rhs)
+  {
+    return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+  }
+
+  friend
+  bool operator !=(const gap_buffer& lhs, const gap_buffer& rhs)
+  {
+    return !(lhs == rhs);
+  }
+
+  bool operator <(const gap_buffer& rhs) const
+  {
+    auto[left, right] = std::mismatch(begin(), end(), rhs.begin(), rhs.end());
+
+    if (right == rhs.end()) return false;
+    else if (left == end()) return true;
+    else return *left < *right;
+  }
+
+  bool operator >(const gap_buffer& rhs) const
+  {
+    return rhs < *this;
+  }
+
+  bool operator <=(const gap_buffer& rhs) const
+  {
+    return !(rhs < *this);
+  }
+
+  bool operator >=(const gap_buffer& rhs) const
+  {
+    return !(*this < rhs);
+  }
+
+  // additional
   template<typename InputIt>
   void append(InputIt first, InputIt last)
   {
     insert(end(), first, last);
   }
 
-  void append(T c)
-  {
-    insert(end(), &c, &c + 1);
-  }
+  void append(const T& value) { push_back(value); }
+
+  void append(T&& value) { push_back(std::move(value)); }
 
   template<typename InputIt>
   void replace(const_iterator f1, const_iterator l1, InputIt f2, InputIt l2)
@@ -596,25 +640,6 @@ public:
   {
     return substr_impl<gap_buffer>(first, last);
   }
-
-  const_iterator begin() const { return const_iterator(this); }
-  const_iterator cbegin() const { return begin(); }
-
-  const_iterator end() const { return const_iterator(this, size()); }
-  const_iterator cend() const { return end(); }
-
-  iterator begin() { return iterator(this); }
-  iterator end() { return iterator(this, size()); }
-
-  const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
-  const_reverse_iterator crbegin() const { return rbegin(); }
-
-  const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
-  const_reverse_iterator crend() const { return rend(); }
-
-  reverse_iterator rbegin() { return reverse_iterator(end()); }
-
-  reverse_iterator rend() { return reverse_iterator(begin()); }
 
 protected:
 
