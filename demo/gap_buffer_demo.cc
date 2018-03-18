@@ -71,6 +71,12 @@ int main()
   gb.pop_back();
   print_gb(gb);
 
+  gb.resize(3);
+  print_gb(gb);
+
+  gb.resize(10, 'x');
+  print_gb(gb);
+
   dr::gap_buffer<A> gba;
 
   gba.insert(gba.begin(), A('x'));
@@ -78,4 +84,8 @@ int main()
   print_gb(gba);
 
   gba.push_back(A('b'));
+
+  gba.emplace(gba.end(), 'z');
+
+  print_gb(gba);
 }

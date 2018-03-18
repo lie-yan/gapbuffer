@@ -530,6 +530,19 @@ public:
 
   void clear() { erase(begin(), end()); }
 
+  void resize(size_type count, const value_type& value)
+  {
+    if (count < size())
+      erase(begin() + count, end());
+    else
+      insert(end(), count - size(), value);
+  }
+
+  void resize(size_type count)
+  {
+    resize(count, T{});
+  }
+
   iterator insert(const_iterator pos, const T& value)
   {
     return insert(pos, &value, &value + 1);
@@ -553,6 +566,18 @@ public:
   }
 
   void erase(const_iterator pos) { erase(pos, pos + 1); }
+
+  template<typename ... Args>
+  iterator emplace(const_iterator pos, Args&& ... args)
+  {
+    return insert(pos, T(std::forward<Args>(args)...));
+  }
+
+  template<typename ... Args>
+  reference emplace_back(Args&& ... args)
+  {
+    return *emplace(end(), std::forward<Args>(args)...);
+  }
 
   void push_back(const T& value) { insert(end(), &value, &value + 1); }
   void push_back(T&& value) { insert(end(), std::make_move_iterator(&value), std::make_move_iterator(&value + 1)); }
