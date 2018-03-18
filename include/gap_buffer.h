@@ -526,7 +526,11 @@ public:
 
   [[nodiscard]] bool empty() const noexcept { return size() == 0; }
 
-  void shrink_to_fit() { /*DO NOTHNG*/ }
+  void shrink_to_fit()
+  {
+    gap_buffer temp(begin(), end());
+    swap(temp);
+  }
 
   void clear() { erase(begin(), end()); }
 

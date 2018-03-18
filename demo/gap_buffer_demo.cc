@@ -11,23 +11,32 @@ void print_gb(dr::gap_buffer<T> const& gb)
 class A {
 public:
   A(char ch = 'd')
-      : _ch(ch) { std::cout << "default constructor\n"; }
+      : _ch(ch)
+  {
+//    std::cout << "default constructor\n";
+  }
   A(const A& a)
-      : _ch(a._ch) { std::cout << "copy ctor\n"; }
+      : _ch(a._ch)
+  {
+//    std::cout << "copy ctor\n";
+  }
   A(A&& a)
-      : _ch(a._ch) { std::cout << "move constructor\n"; }
+      : _ch(a._ch)
+  {
+//    std::cout << "move constructor\n";
+  }
 
   A& operator =(const A& a)
   {
     _ch = a._ch;
-    std::cout << "copy assign\n";
+//    std::cout << "copy assign\n";
     return *this;
   }
 
   A& operator =(const A&& a)
   {
     _ch = a._ch;
-    std::cout << "move assign\n";
+//    std::cout << "move assign\n";
     return *this;
   }
 
@@ -88,4 +97,14 @@ int main()
   gba.emplace(gba.end(), 'z');
 
   print_gb(gba);
+
+  gba.insert(gba.begin(), 100, A('x'));
+  gba.erase(gba.begin(), gba.begin() + 80);
+  std::cout << gba.capacity() << std::endl;
+
+  gba.shrink_to_fit();
+  std::cout << gba.capacity() << std::endl;
+
+  print_gb(gba);
+
 }
