@@ -107,4 +107,7 @@ int main()
 
   print_gb(gba);
 
+  dr::gap_buffer<char> gb1 = {'a', 'b', 'c'}, gb2 = {'c', 'd', 'e'};
+  std::cout << (gb1 < gb2) << std::endl;
+
 }

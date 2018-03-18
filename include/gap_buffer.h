@@ -617,28 +617,32 @@ public:
     return !(lhs == rhs);
   }
 
-  bool operator <(const gap_buffer& rhs) const
+  friend
+  bool operator <(const gap_buffer& lhs, const gap_buffer& rhs)
   {
-    auto[left, right] = std::mismatch(begin(), end(), rhs.begin(), rhs.end());
+    auto[left, right] = std::mismatch(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 
     if (right == rhs.end()) return false;
-    else if (left == end()) return true;
+    else if (left == lhs.end()) return true;
     else return *left < *right;
   }
 
-  bool operator >(const gap_buffer& rhs) const
+  friend
+  bool operator >(const gap_buffer& lhs, const gap_buffer& rhs)
   {
-    return rhs < *this;
+    return rhs < lhs;
   }
 
-  bool operator <=(const gap_buffer& rhs) const
+  friend
+  bool operator <=(const gap_buffer& lhs, const gap_buffer& rhs)
   {
-    return !(rhs < *this);
+    return !(rhs < lhs);
   }
 
-  bool operator >=(const gap_buffer& rhs) const
+  friend
+  bool operator >=(const gap_buffer& lhs, const gap_buffer& rhs)
   {
-    return !(*this < rhs);
+    return !(lhs < rhs);
   }
 
   // additional
