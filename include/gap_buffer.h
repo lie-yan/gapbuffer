@@ -51,17 +51,17 @@ struct gap_buffer {
 
     reference operator [](difference_type i) const
     {
-      return container->operator [](offset + i);
+      return (*container)[offset + i];
     }
 
     reference operator *() const
     {
-      return container->operator [](offset);
+      return (*container)[offset];
     }
 
     pointer operator ->() const
     {
-      return &(container->operator [](offset));
+      return &(*container)[offset];
     }
 
     self_type& operator ++()
@@ -181,17 +181,17 @@ struct gap_buffer {
 
     reference operator [](difference_type i) const
     {
-      return container->operator [](offset + i);
+      return (*container)[offset + i];
     }
 
     reference operator *() const
     {
-      return container->operator [](offset);
+      return (*container)[offset];
     }
 
     pointer operator ->() const
     {
-      return &(container->operator [](offset));
+      return &(*container)[offset];
     }
 
     self_type& operator ++()
@@ -480,7 +480,7 @@ public:
   }
 
   size_type size() const noexcept { return finish - start - gap_size; }
-  size_type max_size() const noexcept { return size_type(-1); }
+  size_type max_size() const noexcept { return size_type(1 << 31); }
   size_type capacity() const noexcept { return finish - start; }
 
   // ------ basis END HERE ------
@@ -488,14 +488,14 @@ public:
   reference operator [](size_type pos)
   {
     return const_cast<reference>(
-        static_cast<const gap_buffer&>(*this).operator [](pos)
+        static_cast<const gap_buffer&>(*this)[pos]
     );
   }
 
   const_reference at(size_type pos) const
   {
     if (pos >= size()) throw std::out_of_range("index out of range");
-    return operator [](pos);
+    return (*this)[pos];
   }
 
   reference at(size_type pos)
