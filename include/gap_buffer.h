@@ -165,6 +165,9 @@ struct gap_buffer {
     difference_type offset;
   };
 
+  // Here we repeat ourselves, that is, DRY principle is violated.
+  // We can get rid of the repetition with CRTP. But let's keep it
+  // as is. 
   struct const_iterator {
     using self_type         = const_iterator;
     using container_type    = gap_buffer;
