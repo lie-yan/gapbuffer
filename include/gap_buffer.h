@@ -15,22 +15,21 @@ namespace dr {
 template<typename T>
 T round_up(T s, unsigned int n) { return ((s + n - 1) / n) * n; }
 
-template<typename charT, typename Alloc = std::allocator<charT>>
+template<typename T, typename Allocator = std::allocator<T>>
 struct gap_buffer {
-  using value_type      = charT;
+  using value_type      = T;
+  using allocator_type  = Allocator;
+  using size_type       = std::size_t;
   using difference_type = ptrdiff_t;
-  using size_type       = size_t;
   using reference       = value_type&;
   using const_reference = const value_type&;
-  using pointer         = value_type*;
-  using const_pointer   = const value_type*;
+  using pointer         = typename std::allocator_traits<Allocator>::pointer;
+  using const_pointer   = typename std::allocator_traits<Allocator>::const_pointer;
 
-  static constexpr float incremental_factor = 0.2;
-  static constexpr size_type default_size = 8;
-  static constexpr size_type alignment = 8;
-
+  struct iterator;
   struct const_iterator;
-  struct const_reverse_iterator;
+  using reverse_iterator       = std::reverse_iterator<iterator>;
+  using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
   struct iterator {
     using self_type         = iterator;
@@ -42,10 +41,8 @@ struct gap_buffer {
     using pointer           = container_type::pointer;
     using iterator_category = std::random_access_iterator_tag;
 
-    explicit iterator(gap_buffer* container = nullptr,
-                      difference_type offset = 0)
-        : container(container),
-          offset(offset) { }
+    explicit iterator(gap_buffer* container = nullptr, difference_type offset = 0)
+        : container(container), offset(offset) { }
 
     operator const_iterator() const
     {
@@ -298,275 +295,12 @@ struct gap_buffer {
     difference_type offset;
   };
 
-  struct reverse_iterator {
-    using self_type         = reverse_iterator;
-    using container_type    = gap_buffer;
-
-    using value_type        = container_type::value_type;
-    using difference_type   = container_type::difference_type;
-    using reference         = container_type::reference;
-    using pointer           = container_type::pointer;
-    using iterator_category = std::random_access_iterator_tag;
-
-    explicit reverse_iterator(gap_buffer* container = nullptr, difference_type offset = 0)
-        : container(container),
-          offset(offset) { }
-
-    operator const_reverse_iterator() const
-    {
-      return const_reverse_iterator(container, offset);
-    }
-
-    reference operator [](difference_type i) const
-    {
-      return container->operator [](offset + i);
-    }
-
-    reference operator *() const
-    {
-      return container->operator [](offset);
-    }
-
-    pointer operator ->() const
-    {
-      return &(container->operator [](offset));
-    }
-
-    self_type& operator ++()
-    {
-      offset--;
-      return *this;
-    }
-
-    self_type operator ++(int)
-    {
-      self_type retval = *this;
-      this->operator ++();
-      return retval;
-    }
-
-    self_type& operator --()
-    {
-      offset++;
-      return *this;
-    }
-
-    self_type operator --(int)
-    {
-      self_type retval = *this;
-      this->operator --();
-      return retval;
-    }
-
-    bool operator ==(const self_type& other) const
-    {
-      return container == other.container && offset == other.offset;
-    }
-
-    bool operator !=(const self_type& other) const
-    {
-      return !(*this == other);
-    }
-
-    bool operator <(const self_type& other) const
-    {
-      Expects(container == other.container);
-      return offset > other.offset;
-    }
-
-    bool operator >(const self_type& other) const
-    {
-      return other < *this;
-    }
-
-    bool operator <=(const self_type& other) const
-    {
-      return !(other < *this);
-    }
-
-    bool operator >=(const self_type& other) const
-    {
-      return !(*this < other);
-    }
-
-    self_type& operator +=(difference_type n)
-    {
-      offset -= n;
-      return *this;
-    }
-
-    friend
-    self_type operator +(self_type it, difference_type n)
-    {
-      it.offset -= n;
-      return it;
-    }
-
-    friend
-    self_type operator +(difference_type n, self_type it)
-    {
-      it.offset -= n;
-      return it;
-    }
-
-    self_type& operator -=(difference_type n)
-    {
-      offset += n;
-      return *this;
-    }
-
-    self_type operator -(difference_type n) const
-    {
-      return self_type(container, offset + n);
-    }
-
-    difference_type operator -(const self_type& other) const
-    {
-      Expects(container == other.container);
-      return other.offset - offset;
-    }
-
-    friend class gap_buffer;
-
-  private:
-    gap_buffer* container;
-    difference_type offset;
-  };
-
-  struct const_reverse_iterator {
-
-    using self_type         = const_reverse_iterator;
-    using container_type    = gap_buffer;
-
-    using value_type        = container_type::value_type;
-    using difference_type   = container_type::difference_type;
-    using reference         = container_type::const_reference;
-    using pointer           = container_type::const_pointer;
-    using iterator_category = std::random_access_iterator_tag;
-
-    explicit const_reverse_iterator(const gap_buffer* container = nullptr,
-                                    difference_type offset = 0)
-        : container(container),
-          offset(offset) { }
-
-    reference operator [](difference_type i) const
-    {
-      return container->operator [](offset + i);
-    }
-
-    reference operator *() const
-    {
-      return container->operator [](offset);
-    }
-
-    pointer operator ->() const
-    {
-      return &(container->operator [](offset));
-    }
-
-    self_type& operator ++()
-    {
-      offset--;
-      return *this;
-    }
-
-    self_type operator ++(int)
-    {
-      self_type retval = *this;
-      this->operator ++();
-      return retval;
-    }
-
-    self_type& operator --()
-    {
-      offset++;
-      return *this;
-    }
-
-    self_type operator --(int)
-    {
-      self_type retval = *this;
-      this->operator --();
-      return retval;
-    }
-
-    bool operator ==(const self_type& other) const
-    {
-      return container == other.container && offset == other.offset;
-    }
-
-    bool operator !=(const self_type& other) const
-    {
-      return !(*this == other);
-    }
-
-    bool operator <(const self_type& other) const
-    {
-      Expects(container == other.container);
-      return offset > other.offset;
-    }
-
-    bool operator >(const self_type& other) const
-    {
-      return other < *this;
-    }
-
-    bool operator <=(const self_type& other) const
-    {
-      return !(other < *this);
-    }
-
-    bool operator >=(const self_type& other) const
-    {
-      return !(*this < other);
-    }
-
-    self_type& operator +=(difference_type n)
-    {
-      offset -= n;
-      return *this;
-    }
-
-    friend
-    self_type operator +(self_type it, difference_type n)
-    {
-      it.offset -= n;
-      return it;
-    }
-
-    friend
-    self_type operator +(difference_type n, self_type it)
-    {
-      it.offset -= n;
-      return it;
-    }
-
-    self_type& operator -=(difference_type n)
-    {
-      offset += n;
-      return *this;
-    }
-
-    self_type operator -(difference_type n) const
-    {
-      return self_type(container, offset + n);
-    }
-
-    difference_type operator -(const self_type& other) const
-    {
-      Expects(container == other.container);
-      return other.offset - offset;
-    }
-
-    friend class gap_buffer;
-
-  private:
-    const gap_buffer* container;
-    difference_type offset;
-  };
+private:
+  static constexpr float incremental_factor = 0.2;
+  static constexpr size_type default_size = 8;
+  static constexpr size_type alignment = 8;
 
 public:
-
   explicit gap_buffer(size_type n = default_size)
   {
     start = allocate_and_construct(n);
@@ -692,7 +426,7 @@ public:
     Expects(first.container == this && last.container == this);
     difference_type num_to_erase = std::distance(first, last);
     relocate_gap(first.offset);
-    std::fill_n(gap_start + gap_size, num_to_erase, charT{});
+    std::fill_n(gap_start + gap_size, num_to_erase, T{});
     gap_size += num_to_erase;
     return iterator(this, first.offset);
   }
@@ -826,12 +560,12 @@ public:
   /// Inserts the character `c` before the i-th element.
   /// \param i
   /// \param c
-  void insert(size_type i, charT c)
+  void insert(size_type i, T c)
   {
     insert(const_iterator(this, i), &c, &c + 1);
   }
 
-  void push_back(charT c) { append(c); }
+  void push_back(T c) { append(c); }
   void pop_back() { erase(size() - 1, 1); }
 
   template<typename InputIt>
@@ -840,7 +574,7 @@ public:
     insert(end(), first, last);
   }
 
-  void append(charT c)
+  void append(T c)
   {
     insert(end(), &c, &c + 1);
   }
@@ -870,18 +604,17 @@ public:
   const_iterator cend() const { return end(); }
 
   iterator begin() { return iterator(this); }
-
   iterator end() { return iterator(this, size()); }
 
-  const_reverse_iterator rbegin() const { return const_reverse_iterator(this, size() - 1); }
+  const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
   const_reverse_iterator crbegin() const { return rbegin(); }
 
-  const_reverse_iterator rend() const { return const_reverse_iterator(this, -1); }
+  const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
   const_reverse_iterator crend() const { return rend(); }
 
-  reverse_iterator rbegin() { return reverse_iterator(this, size() - 1); }
+  reverse_iterator rbegin() { return reverse_iterator(end()); }
 
-  reverse_iterator rend() { return reverse_iterator(this, -1); }
+  reverse_iterator rend() { return reverse_iterator(begin()); }
 
 protected:
 
@@ -923,7 +656,7 @@ protected:
   }
 
 private:
-  Alloc data_allocator;
+  Allocator data_allocator;
 
   pointer start;
   pointer finish;
