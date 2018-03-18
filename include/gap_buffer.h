@@ -723,4 +723,11 @@ private:
 };
 
 
+template <typename T, typename Allocator>
+void swap(gap_buffer<T, Allocator>& lhs, gap_buffer<T, Allocator>& rhs)
+{
+  lhs.swap(rhs);
+}
+
+
 }
