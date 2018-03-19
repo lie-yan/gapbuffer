@@ -317,7 +317,7 @@ public:
   gap_buffer(size_type count, const T& value)
       : gap_buffer(count)
   {
-    for (size_type i = 0; i < count; ++i) (*this)[i] = value;
+    for (size_type i = 0; i < count; ++i) push_back(value);
   }
 
   template<typename InputIt>
@@ -537,17 +537,12 @@ public:
 
   void clear() { erase(begin(), end()); }
 
-  void resize(size_type count, const value_type& value)
+  void resize(size_type count, const value_type& value = value_type{})
   {
     if (count < size())
       erase(begin() + count, end());
     else
       insert(end(), count - size(), value);
-  }
-
-  void resize(size_type count)
-  {
-    resize(count, T{});
   }
 
   iterator insert(const_iterator pos, const T& value)
@@ -725,8 +720,7 @@ private:
   size_type gap_size;
 };
 
-
-template <typename T, typename Allocator>
+template<typename T, typename Allocator>
 void swap(gap_buffer<T, Allocator>& lhs, gap_buffer<T, Allocator>& rhs)
 {
   lhs.swap(rhs);

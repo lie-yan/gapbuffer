@@ -2,9 +2,11 @@
 #include "gap_buffer.h"
 
 template<typename T>
-void print_gb(dr::gap_buffer<T> const& gb)
+void print_gb(std::string const& s, dr::gap_buffer<T> const& gb)
 {
+  std::cout << s << ": \"";
   for (const auto& c : gb) std::cout << c;
+  std::cout << "\"";
   std::cout << std::endl;
 }
 
@@ -52,62 +54,116 @@ private:
 
 int main()
 {
-  std::string s("hello, world");
-  dr::gap_buffer<char> gb(s.begin(), s.end());
-  print_gb(gb);
+  using namespace dr;
 
-  for (auto i = gb.crbegin(); i != gb.crend(); ++i)
+  gap_buffer<char> gb0(10);
+  print_gb("gb0", gb0);
+
+  gap_buffer<char> gb1(10, 'a');
+  print_gb("gb1", gb1);
+
+  std::string s("xyz");
+  gap_buffer<char> gb2(s.begin(), s.end());
+  print_gb("gb2", gb2);
+
+  gap_buffer<char> gb3(gb2);
+  print_gb("gb3", gb3);
+
+  gap_buffer<char> gb4(std::move(gb1));
+  print_gb("gb4", gb4);
+
+  gap_buffer<char> gb5({'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'});
+  print_gb("gb5", gb5);
+
+  print_gb("gb5", gb5 = gb0);
+  print_gb("gb5", gb5 = std::move(gb2));
+
+  gb4.swap(gb5);
+  print_gb("gb4", gb4);
+  print_gb("gb5", gb5);
+
+  gap_buffer<char> gb6(10, 'a');
+  print_gb("gb6", gb6);
+  gb6.assign(8, 'b');
+  print_gb("gb6", gb6);
+  gb6.assign(s.begin(), s.end());
+  print_gb("gb6", gb6);
+  gb6.assign({'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'});
+  print_gb("gb6", gb6);
+
+  std::cout << "gb6[1]='" << gb6[1] << "'" << std::endl;
+
+  gb6.erase(gb6.begin() + 3, gb6.begin() + 5);
+  print_gb("gb6", gb6);
+
+  gb6.insert(gb6.begin(), s.begin(), s.end());
+  print_gb("gb6", gb6);
+
+  std::cout << "gb6.capacity()=" << gb6.capacity() << std::endl;
+  gb6.reserve(100);
+  std::cout << "gb6.capacity()=" << gb6.capacity() << std::endl;
+
+  std::cout << "gb6.size()=" << gb6.size() << std::endl;
+  std::cout << "gb6.max_size()=" << gb6.max_size() << std::endl;
+
+  std::cout << "gb6.at(3)=" << gb6.at(3) << std::endl;
+
+  try
+  {
+    gb6.at(10);
+  }
+  catch (std::out_of_range& err)
+  {
+    std::cout << "gb6.at(10) out_of_range" << std::endl;
+  }
+
+  std::cout << "gb6.front()='" << gb6.front() << "'" << std::endl;
+  std::cout << "gb6.back()='" << gb6.back() << "'" << std::endl;
+  std::cout << "gb6.empty()=" << gb6.empty() << std::endl;
+
+  gb6.shrink_to_fit();
+  std::cout << "gb6.capacity()=" << gb6.capacity() << std::endl;
+
+  gb6.clear();
+  print_gb("gb6", gb6);
+
+  gb6.resize(13, 'b');
+  print_gb("gb6", gb6);
+
+  gb6.insert(gb6.begin()+5, 'c');
+  print_gb("gb6", gb6);
+
+  gb6.insert(gb6.begin()+5, 3, 'o');
+  print_gb("gb6", gb6);
+
+  gb6.insert(gb6.begin()+5, {'1', '2', '3'});
+  print_gb("gb6", gb6);
+
+  gb6.erase(gb6.begin()+5);
+  print_gb("gb6", gb6);
+
+  gb6.emplace(gb6.begin() + 3, '1');
+  print_gb("gb6", gb6);
+
+  gb6.emplace_back('4');
+  print_gb("gb6", gb6);
+
+  gb6.push_back('5');
+  print_gb("gb6", gb6);
+
+  gb6.pop_back();
+  print_gb("gb6", gb6);
+
+  for (auto i = gb6.rbegin(); i != gb6.rend(); ++i)
     std::cout << *i;
   std::cout << std::endl;
 
-  gb.erase(gb.begin(), gb.begin() + 2);
+  std::string s2 = "1234567890";
+  gap_buffer<char> gb7(s2.begin(), s2.end());
+  print_gb("gb7", gb7);
+  gb7.replace(gb7.begin()+1, gb7.begin()+4, s2.rbegin() + 1, s2.rbegin()+3);
+  print_gb("gb7", gb7);
 
-  gb = {'1', '2', '3'};
-  print_gb(gb);
-
-  gb.assign(s.begin(), s.end());
-  print_gb(gb);
-
-  gb.assign({'a', 'b', 'c'});
-  print_gb(gb);
-
-  auto it = gb.insert(gb.begin(), 'd');
-  print_gb(gb);
-
-  gb.insert(it, 5, 'e');
-  print_gb(gb);
-
-  gb.pop_back();
-  print_gb(gb);
-
-  gb.resize(3);
-  print_gb(gb);
-
-  gb.resize(10, 'x');
-  print_gb(gb);
-
-  dr::gap_buffer<A> gba;
-
-  gba.insert(gba.begin(), A('x'));
-
-  print_gb(gba);
-
-  gba.push_back(A('b'));
-
-  gba.emplace(gba.end(), 'z');
-
-  print_gb(gba);
-
-  gba.insert(gba.begin(), 100, A('x'));
-  gba.erase(gba.begin(), gba.begin() + 80);
-  std::cout << gba.capacity() << std::endl;
-
-  gba.shrink_to_fit();
-  std::cout << gba.capacity() << std::endl;
-
-  print_gb(gba);
-
-  dr::gap_buffer<char> gb1 = {'a', 'b', 'c'}, gb2 = {'c', 'd', 'e'};
-  std::cout << (gb1 < gb2) << std::endl;
-
+  auto gb8 = gb7.substr(gb7.begin()+2, gb7.end());
+  print_gb("gb8", gb8);
 }
