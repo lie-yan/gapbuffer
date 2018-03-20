@@ -26,11 +26,7 @@ struct gap_buffer {
   using pointer         = typename std::allocator_traits<Allocator>::pointer;
   using const_pointer   = typename std::allocator_traits<Allocator>::const_pointer;
 
-  struct iterator;
   struct const_iterator;
-  using reverse_iterator       = std::reverse_iterator<iterator>;
-  using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-
   struct iterator {
     using self_type         = iterator;
     using container_type    = gap_buffer;
@@ -297,6 +293,10 @@ struct gap_buffer {
     const gap_buffer* container;
     difference_type offset;
   };
+
+  using reverse_iterator       = std::reverse_iterator<iterator>;
+  using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
 
 private:
   static constexpr float incremental_factor = 0.2;
