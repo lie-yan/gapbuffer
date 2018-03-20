@@ -52,6 +52,7 @@ private:
   char _ch;
 };
 
+// We will replace the following code with a googletest case later. 
 int main()
 {
   using namespace dr;
@@ -101,6 +102,7 @@ int main()
 
   std::cout << "gb6.capacity()=" << gb6.capacity() << std::endl;
   gb6.reserve(100);
+  print_gb("gb6", gb6);
   std::cout << "gb6.capacity()=" << gb6.capacity() << std::endl;
 
   std::cout << "gb6.size()=" << gb6.size() << std::endl;
