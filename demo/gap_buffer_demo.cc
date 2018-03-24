@@ -2,8 +2,7 @@
 #include "gap_buffer.h"
 
 template<typename T>
-void print_gb(std::string const& s, dr::gap_buffer<T> const& gb)
-{
+void print_gb(std::string const& s, dr::gap_buffer<T> const& gb) {
   std::cout << s << ": \"";
   for (const auto& c : gb) std::cout << c;
   std::cout << "\"";
@@ -13,38 +12,32 @@ void print_gb(std::string const& s, dr::gap_buffer<T> const& gb)
 class A {
 public:
   A(char ch = 'd')
-      : _ch(ch)
-  {
+      : _ch(ch) {
 //    std::cout << "default constructor\n";
   }
   A(const A& a)
-      : _ch(a._ch)
-  {
+      : _ch(a._ch) {
 //    std::cout << "copy ctor\n";
   }
   A(A&& a)
-      : _ch(a._ch)
-  {
+      : _ch(a._ch) {
 //    std::cout << "move constructor\n";
   }
 
-  A& operator =(const A& a)
-  {
+  A& operator =(const A& a) {
     _ch = a._ch;
 //    std::cout << "copy assign\n";
     return *this;
   }
 
-  A& operator =(const A&& a)
-  {
+  A& operator =(const A&& a) {
     _ch = a._ch;
 //    std::cout << "move assign\n";
     return *this;
   }
 
   friend
-  std::ostream& operator <<(std::ostream& os, const A& a)
-  {
+  std::ostream& operator <<(std::ostream& os, const A& a) {
     os << a._ch;
     return os;
   }
@@ -53,8 +46,7 @@ private:
 };
 
 // We will replace the following code with a googletest case later. 
-int main()
-{
+int main() {
   using namespace dr;
 
   gap_buffer<char> gb0(10);
@@ -110,12 +102,10 @@ int main()
 
   std::cout << "gb6.at(3)=" << gb6.at(3) << std::endl;
 
-  try
-  {
+  try {
     gb6.at(10);
   }
-  catch (std::out_of_range& err)
-  {
+  catch (std::out_of_range& err) {
     std::cout << "gb6.at(10) out_of_range" << std::endl;
   }
 
@@ -132,16 +122,16 @@ int main()
   gb6.resize(13, 'b');
   print_gb("gb6", gb6);
 
-  gb6.insert(gb6.begin()+5, 'c');
+  gb6.insert(gb6.begin() + 5, 'c');
   print_gb("gb6", gb6);
 
-  gb6.insert(gb6.begin()+5, 3, 'o');
+  gb6.insert(gb6.begin() + 5, 3, 'o');
   print_gb("gb6", gb6);
 
-  gb6.insert(gb6.begin()+5, {'1', '2', '3'});
+  gb6.insert(gb6.begin() + 5, {'1', '2', '3'});
   print_gb("gb6", gb6);
 
-  gb6.erase(gb6.begin()+5);
+  gb6.erase(gb6.begin() + 5);
   print_gb("gb6", gb6);
 
   gb6.emplace(gb6.begin() + 3, '1');
@@ -163,9 +153,9 @@ int main()
   std::string s2 = "1234567890";
   gap_buffer<char> gb7(s2.begin(), s2.end());
   print_gb("gb7", gb7);
-  gb7.replace(gb7.begin()+1, gb7.begin()+4, s2.rbegin() + 1, s2.rbegin()+3);
+  gb7.replace(gb7.begin() + 1, gb7.begin() + 4, s2.rbegin() + 1, s2.rbegin() + 3);
   print_gb("gb7", gb7);
 
-  auto gb8 = gb7.substr(gb7.begin()+2, gb7.end());
+  auto gb8 = gb7.substr(gb7.begin() + 2, gb7.end());
   print_gb("gb8", gb8);
 }

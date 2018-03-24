@@ -27,6 +27,7 @@ struct gap_buffer {
   using const_pointer   = typename std::allocator_traits<Allocator>::const_pointer;
 
   struct const_iterator;
+
   struct iterator {
     using self_type         = iterator;
     using container_type    = gap_buffer;
@@ -40,116 +41,96 @@ struct gap_buffer {
     explicit iterator(gap_buffer* container = nullptr, difference_type offset = 0)
         : container(container), offset(offset) { }
 
-    operator const_iterator() const
-    {
+    operator const_iterator() const {
       return const_iterator(container, offset);
     }
 
-    reference operator [](difference_type i) const
-    {
+    reference operator [](difference_type i) const {
       return (*container)[offset + i];
     }
 
-    reference operator *() const
-    {
+    reference operator *() const {
       return (*container)[offset];
     }
 
-    pointer operator ->() const
-    {
+    pointer operator ->() const {
       return &(*container)[offset];
     }
 
-    self_type& operator ++()
-    {
+    self_type& operator ++() {
       offset++;
       return *this;
     }
 
-    self_type operator ++(int)
-    {
+    self_type operator ++(int) {
       self_type retval = *this;
       this->operator ++();
       return retval;
     }
 
-    self_type& operator --()
-    {
+    self_type& operator --() {
       offset--;
       return *this;
     }
 
-    self_type operator --(int)
-    {
+    self_type operator --(int) {
       self_type retval = *this;
       this->operator --();
       return retval;
     }
 
-    bool operator ==(const self_type& other) const
-    {
+    bool operator ==(const self_type& other) const {
       return container == other.container && offset == other.offset;
     }
 
-    bool operator !=(const self_type& other) const
-    {
+    bool operator !=(const self_type& other) const {
       return !(*this == other);
     }
 
-    bool operator <(const self_type& other) const
-    {
+    bool operator <(const self_type& other) const {
       Expects(container == other.container);
       return offset < other.offset;
     }
 
-    bool operator >(const self_type& other) const
-    {
+    bool operator >(const self_type& other) const {
       return other < *this;
     }
 
-    bool operator <=(const self_type& other) const
-    {
+    bool operator <=(const self_type& other) const {
       return !(other < *this);
     }
 
-    bool operator >=(const self_type& other) const
-    {
+    bool operator >=(const self_type& other) const {
       return !(*this < other);
     }
 
-    self_type& operator +=(difference_type n)
-    {
+    self_type& operator +=(difference_type n) {
       offset += n;
       return *this;
     }
 
     friend
-    self_type operator +(self_type it, difference_type n)
-    {
+    self_type operator +(self_type it, difference_type n) {
       it.offset += n;
       return it;
     }
 
     friend
-    self_type operator +(difference_type n, self_type it)
-    {
+    self_type operator +(difference_type n, self_type it) {
       it.offset += n;
       return it;
     }
 
-    self_type& operator -=(difference_type n)
-    {
+    self_type& operator -=(difference_type n) {
       offset -= n;
       return *this;
     }
 
-    self_type operator -(difference_type n) const
-    {
+    self_type operator -(difference_type n) const {
       return self_type(container, offset - n);
     }
 
-    difference_type operator -(const self_type& other) const
-    {
+    difference_type operator -(const self_type& other) const {
       Expects(container == other.container);
       return offset - other.offset;
     }
@@ -178,111 +159,92 @@ struct gap_buffer {
         : container(container),
           offset(offset) { }
 
-    reference operator [](difference_type i) const
-    {
+    reference operator [](difference_type i) const {
       return (*container)[offset + i];
     }
 
-    reference operator *() const
-    {
+    reference operator *() const {
       return (*container)[offset];
     }
 
-    pointer operator ->() const
-    {
+    pointer operator ->() const {
       return &(*container)[offset];
     }
 
-    self_type& operator ++()
-    {
+    self_type& operator ++() {
       offset++;
       return *this;
     }
 
-    self_type operator ++(int)
-    {
+    self_type operator ++(int) {
       self_type retval = *this;
       this->operator ++();
       return retval;
     }
 
-    self_type& operator --()
-    {
+    self_type& operator --() {
       offset--;
       return *this;
     }
 
-    self_type operator --(int)
-    {
+    self_type operator --(int) {
       self_type retval = *this;
       this->operator --();
       return retval;
     }
 
-    bool operator ==(const self_type& other) const
-    {
+    bool operator ==(const self_type& other) const {
       return container == other.container && offset == other.offset;
     }
 
-    bool operator !=(const self_type& other) const
-    {
+    bool operator !=(const self_type& other) const {
       return !(*this == other);
     }
 
-    bool operator <(const self_type& other) const
-    {
+    bool operator <(const self_type& other) const {
       Expects(container == other.container);
       return offset < other.offset;
     }
 
-    bool operator >(const self_type& other) const
-    {
+    bool operator >(const self_type& other) const {
       return other < *this;
     }
 
-    bool operator <=(const self_type& other) const
-    {
+    bool operator <=(const self_type& other) const {
       return !(other < *this);
     }
 
-    bool operator >=(const self_type& other) const
-    {
+    bool operator >=(const self_type& other) const {
       return !(*this < other);
     }
 
-    self_type& operator +=(difference_type n)
-    {
+    self_type& operator +=(difference_type n) {
       offset += n;
       return *this;
     }
 
     friend
-    self_type operator +(self_type it, difference_type n)
-    {
+    self_type operator +(self_type it, difference_type n) {
       it.offset += n;
       return it;
     }
 
     friend
-    self_type operator +(difference_type n, self_type it)
-    {
+    self_type operator +(difference_type n, self_type it) {
       it.offset += n;
       return it;
     }
 
-    self_type& operator -=(difference_type n)
-    {
+    self_type& operator -=(difference_type n) {
       offset -= n;
       return *this;
     }
 
-    self_type operator -(difference_type n) const
-    {
+    self_type operator -(difference_type n) const {
       return self_type(container, offset - n);
     }
 
-    difference_type operator -(const self_type& other) const
-    {
+    difference_type operator -(const self_type& other) const {
       Expects(container == other.container);
       return offset - other.offset;
     }
@@ -297,15 +259,13 @@ struct gap_buffer {
   using reverse_iterator       = std::reverse_iterator<iterator>;
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-
 private:
   static constexpr float incremental_factor = 0.2;
   static constexpr size_type default_size = 8;
   static constexpr size_type alignment = 8;
 
 public:
-  explicit gap_buffer(size_type count = default_size)
-  {
+  explicit gap_buffer(size_type count = default_size) {
     count = round_up(count, alignment);
 
     start = allocate_and_construct(count);
@@ -315,14 +275,12 @@ public:
   }
 
   gap_buffer(size_type count, const T& value)
-      : gap_buffer(count)
-  {
+      : gap_buffer(count) {
     for (size_type i = 0; i < count; ++i) push_back(value);
   }
 
   template<typename InputIt>
-  gap_buffer(InputIt first, InputIt last)
-  {
+  gap_buffer(InputIt first, InputIt last) {
     difference_type n = std::distance(first, last);
     size_type len = round_up(std::max(default_size, size_type(n)), alignment);
 
@@ -330,16 +288,13 @@ public:
     finish = start + len;
 
     int except_flag = 0;
-    try
-    {
+    try {
       gap_start = std::uninitialized_copy(first, last, start);
       except_flag = 1;
       std::uninitialized_default_construct(gap_start, finish);
     }
-    catch (...)
-    {
-      switch (except_flag)
-      {
+    catch (...) {
+      switch (except_flag) {
       case 1:
         std::destroy(start, start + n);
         // FALL THROUGH
@@ -362,28 +317,24 @@ public:
   gap_buffer(std::initializer_list<T> ilist)
       : gap_buffer(ilist.begin(), ilist.end()) { }
 
-  gap_buffer& operator =(const gap_buffer& rhs)
-  {
+  gap_buffer& operator =(const gap_buffer& rhs) {
     gap_buffer temp(rhs);
     swap(temp);
     return *this;
   }
 
-  gap_buffer& operator =(gap_buffer&& rhs) noexcept
-  {
+  gap_buffer& operator =(gap_buffer&& rhs) noexcept {
     swap(rhs);
     return *this;
   }
 
-  ~gap_buffer()
-  {
+  ~gap_buffer() {
     destroy_and_deallocate(start, finish);
     start = finish = gap_start = nullptr;
     gap_size = 0;
   }
 
-  void swap(gap_buffer& rhs)
-  {
+  void swap(gap_buffer& rhs) {
     using std::swap;
     swap(start, rhs.start);
     swap(finish, rhs.finish);
@@ -403,14 +354,12 @@ public:
 
   // ------ basis START HERE ------
 
-  const_reference operator [](size_type pos) const
-  {
+  const_reference operator [](size_type pos) const {
     if (start + pos < gap_start) return *(start + pos);
     else return *(start + gap_size + pos);
   }
 
-  iterator erase(const_iterator first, const_iterator last)
-  {
+  iterator erase(const_iterator first, const_iterator last) {
     Expects(first.container == this && last.container == this);
     difference_type num_to_erase = std::distance(first, last);
     relocate_gap(first.offset);
@@ -426,13 +375,11 @@ public:
   /// \param last
   /// \return iterator to the first inserted element
   template<class InputIt>
-  iterator insert(const_iterator pos, InputIt first, InputIt last)
-  {
+  iterator insert(const_iterator pos, InputIt first, InputIt last) {
     Expects(this == pos.container && pos <= end());
 
     difference_type num_to_insert = std::distance(first, last);
-    if (gap_size >= num_to_insert)
-    {
+    if (gap_size >= num_to_insert) {
       relocate_gap(pos.offset);
 
       std::copy(first, last, gap_start);
@@ -440,8 +387,7 @@ public:
       gap_size -= num_to_insert;
       return iterator(this, pos.offset);
     }
-    else
-    {
+    else {
       size_type old_size = size();
       size_type old_capacity = capacity();
       auto default_delta = size_type(old_capacity * incremental_factor);
@@ -464,8 +410,7 @@ public:
     }
   }
 
-  void reserve(size_type new_cap = 0)
-  {
+  void reserve(size_type new_cap = 0) {
     if (capacity() >= new_cap) return;
     if (new_cap > max_size()) throw std::length_error("new_cap should be less than max_size()");
 
@@ -488,37 +433,32 @@ public:
 
   // ------ basis END HERE ------
 
-  reference operator [](size_type pos)
-  {
+  reference operator [](size_type pos) {
     return const_cast<reference>(
         static_cast<const gap_buffer&>(*this)[pos]
     );
   }
 
-  const_reference at(size_type pos) const
-  {
+  const_reference at(size_type pos) const {
     if (pos >= size()) throw std::out_of_range("index out of range");
     return (*this)[pos];
   }
 
-  reference at(size_type pos)
-  {
+  reference at(size_type pos) {
     return const_cast<reference>(
         static_cast<const gap_buffer&>(*this).at(pos)
     );
   }
 
   const_reference front() const { return (*this)[0]; }
-  reference front()
-  {
+  reference front() {
     return const_cast<reference>(
         static_cast<const gap_buffer&>(*this).front()
     );
   }
 
   const_reference back() const { return (*this)[size() - 1]; }
-  reference back()
-  {
+  reference back() {
     return const_cast<reference>(
         static_cast<const gap_buffer&>(*this).back()
     );
@@ -529,55 +469,47 @@ public:
 
   [[nodiscard]] bool empty() const noexcept { return size() == 0; }
 
-  void shrink_to_fit()
-  {
+  void shrink_to_fit() {
     gap_buffer temp(begin(), end());
     swap(temp);
   }
 
   void clear() { erase(begin(), end()); }
 
-  void resize(size_type count, const value_type& value = value_type{})
-  {
+  void resize(size_type count, const value_type& value = value_type{}) {
     if (count < size())
       erase(begin() + count, end());
     else
       insert(end(), count - size(), value);
   }
 
-  iterator insert(const_iterator pos, const T& value)
-  {
+  iterator insert(const_iterator pos, const T& value) {
     return insert(pos, &value, &value + 1);
   }
 
-  iterator insert(const_iterator pos, T&& value)
-  {
+  iterator insert(const_iterator pos, T&& value) {
     return insert(pos, std::make_move_iterator(&value), std::make_move_iterator(&value + 1));
   }
 
-  iterator insert(const_iterator pos, size_type count, const T& value)
-  {
+  iterator insert(const_iterator pos, size_type count, const T& value) {
     for (size_type i = 0; i < count; ++i)
       pos = insert(pos, value);
     return iterator(this, pos.offset);
   }
 
-  iterator insert(const_iterator pos, std::initializer_list<T> ilist)
-  {
+  iterator insert(const_iterator pos, std::initializer_list<T> ilist) {
     return insert(pos, ilist.begin(), ilist.end());
   }
 
   void erase(const_iterator pos) { erase(pos, pos + 1); }
 
   template<typename ... Args>
-  iterator emplace(const_iterator pos, Args&& ... args)
-  {
+  iterator emplace(const_iterator pos, Args&& ... args) {
     return insert(pos, T(std::forward<Args>(args)...));
   }
 
   template<typename ... Args>
-  reference emplace_back(Args&& ... args)
-  {
+  reference emplace_back(Args&& ... args) {
     return *emplace(end(), std::forward<Args>(args)...);
   }
 
@@ -604,20 +536,17 @@ public:
   reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
 
   friend
-  bool operator ==(const gap_buffer& lhs, const gap_buffer& rhs)
-  {
+  bool operator ==(const gap_buffer& lhs, const gap_buffer& rhs) {
     return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
   }
 
   friend
-  bool operator !=(const gap_buffer& lhs, const gap_buffer& rhs)
-  {
+  bool operator !=(const gap_buffer& lhs, const gap_buffer& rhs) {
     return !(lhs == rhs);
   }
 
   friend
-  bool operator <(const gap_buffer& lhs, const gap_buffer& rhs)
-  {
+  bool operator <(const gap_buffer& lhs, const gap_buffer& rhs) {
     auto[left, right] = std::mismatch(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 
     if (right == rhs.end()) return false;
@@ -626,27 +555,23 @@ public:
   }
 
   friend
-  bool operator >(const gap_buffer& lhs, const gap_buffer& rhs)
-  {
+  bool operator >(const gap_buffer& lhs, const gap_buffer& rhs) {
     return rhs < lhs;
   }
 
   friend
-  bool operator <=(const gap_buffer& lhs, const gap_buffer& rhs)
-  {
+  bool operator <=(const gap_buffer& lhs, const gap_buffer& rhs) {
     return !(rhs < lhs);
   }
 
   friend
-  bool operator >=(const gap_buffer& lhs, const gap_buffer& rhs)
-  {
+  bool operator >=(const gap_buffer& lhs, const gap_buffer& rhs) {
     return !(lhs < rhs);
   }
 
   // additional
   template<typename InputIt>
-  void append(InputIt first, InputIt last)
-  {
+  void append(InputIt first, InputIt last) {
     insert(end(), first, last);
   }
 
@@ -655,35 +580,29 @@ public:
   void append(T&& value) { push_back(std::move(value)); }
 
   template<typename InputIt>
-  void replace(const_iterator f1, const_iterator l1, InputIt f2, InputIt l2)
-  {
+  void replace(const_iterator f1, const_iterator l1, InputIt f2, InputIt l2) {
     auto cursor = erase(f1, l1);
     insert(cursor, f2, l2);
   }
 
   template<typename InputIt>
-  void replace(const_iterator pos, InputIt first, InputIt last)
-  {
+  void replace(const_iterator pos, InputIt first, InputIt last) {
     replace(pos, pos + 1, first, last);
   }
 
-  gap_buffer substr(const_iterator first, const_iterator last) const
-  {
+  gap_buffer substr(const_iterator first, const_iterator last) const {
     return substr_impl<gap_buffer>(first, last);
   }
 
 protected:
 
   template<typename U>
-  U substr_impl(const_iterator first, const_iterator last) const
-  {
+  U substr_impl(const_iterator first, const_iterator last) const {
     return U(first, last);
   }
 
-  void relocate_gap(difference_type offset)
-  {
-    if (gap_start != start + offset)
-    {
+  void relocate_gap(difference_type offset) {
+    if (gap_start != start + offset) {
       if (gap_start < start + offset)
         std::move(gap_start /**/ + gap_size,
                   start + offset + gap_size,
@@ -697,15 +616,13 @@ protected:
     }
   }
 
-  pointer allocate_and_construct(size_type n)
-  {
+  pointer allocate_and_construct(size_type n) {
     pointer result = data_allocator.allocate(n);
     std::uninitialized_default_construct_n(result, n);
     return result;
   }
 
-  void destroy_and_deallocate(pointer start, pointer finish)
-  {
+  void destroy_and_deallocate(pointer start, pointer finish) {
     std::destroy(start, finish);
     if (start)
       data_allocator.deallocate(start, finish - start);
@@ -721,8 +638,7 @@ private:
 };
 
 template<typename T, typename Allocator>
-void swap(gap_buffer<T, Allocator>& lhs, gap_buffer<T, Allocator>& rhs)
-{
+void swap(gap_buffer<T, Allocator>& lhs, gap_buffer<T, Allocator>& rhs) {
   lhs.swap(rhs);
 }
 
