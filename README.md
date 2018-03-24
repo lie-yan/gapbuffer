@@ -1,5 +1,5 @@
-# gapbuffer
+# Gapbuffer
 An STL-like gapbuffer.
 
-## dependency
-Guideline support library.
+## Dependency
+[Guideline support library](https://github.com/Microsoft/GSL).
