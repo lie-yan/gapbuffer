@@ -415,7 +415,6 @@ public:
     if (new_cap > max_size()) throw std::length_error("new_cap should be less than max_size()");
 
     size_type old_size = size();
-    size_type old_capacity = capacity();
     size_type new_capacity = round_up(new_cap, alignment);
 
     gap_buffer temp(new_capacity);
