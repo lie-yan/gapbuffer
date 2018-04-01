@@ -8,10 +8,6 @@
 namespace dr {
 
 /// \brief round `s` up to the nearest multiple of n
-/// \tparam T integral type
-/// \param s
-/// \param n
-/// \return the least multiple of `n` at least `s`
 template<typename T>
 T round_up(T s, unsigned int n) { return ((s + n - 1) / n) * n; }
 
@@ -368,11 +364,6 @@ public:
     return iterator(this, first.offset);
   }
 
-  ///
-  /// \tparam InputIt
-  /// \param pos
-  /// \param first
-  /// \param last
   /// \return iterator to the first inserted element
   template<class InputIt>
   iterator insert(const_iterator pos, InputIt first, InputIt last) {
