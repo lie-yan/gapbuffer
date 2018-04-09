@@ -6,7 +6,6 @@
 
 #include "catch.hpp"
 #include "gap_buffer.h"
-#include <string>
 
 TEST_CASE("Gapbuffer are initialized", "[gapbuffer]") {
 
@@ -19,11 +18,11 @@ TEST_CASE("Gapbuffer are initialized", "[gapbuffer]") {
   }
 
   SECTION("Initialize a gapbuffer with content.") {
-    dr::gap_buffer<char> gb(3,'a');
-    CHECK(gb.size() == 3);
-    CHECK(gb[0] == 'a');
-    CHECK(gb[1] == 'a');
-    CHECK(gb[2] == 'a');
+    dr::gap_buffer<char> gb1(3, 'a');
+    CHECK(gb1.size() == 3);
+    CHECK(gb1[0] == 'a');
+    CHECK(gb1[1] == 'a');
+    CHECK(gb1[2] == 'a');
 
     std::string s("xyzw");
     dr::gap_buffer<char> gb2(s.begin(), s.end());
