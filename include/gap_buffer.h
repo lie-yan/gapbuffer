@@ -262,12 +262,18 @@ private:
 
 public:
   explicit gap_buffer(size_type count = default_size) {
-    count = round_up(count, alignment);
+    if (count == 0) {
+      start = finish = gap_start = nullptr;
+      gap_size = 0;
+    }
+    else {
+      count = round_up(count, alignment);
 
-    start = allocate_and_construct(count);
-    finish = start + count;
-    gap_start = start;
-    gap_size = count;
+      start = allocate_and_construct(count);
+      finish = start + count;
+      gap_start = start;
+      gap_size = count;
+    }
   }
 
   gap_buffer(size_type count, const T& value)
@@ -308,7 +314,7 @@ public:
       : gap_buffer(rhs.begin(), rhs.end()) { }
 
   gap_buffer(gap_buffer&& rhs) noexcept
-      : gap_buffer() { swap(rhs); }
+      : gap_buffer(0) { swap(rhs); }
 
   gap_buffer(std::initializer_list<T> ilist)
       : gap_buffer(ilist.begin(), ilist.end()) { }

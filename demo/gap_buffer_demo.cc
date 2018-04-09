@@ -158,4 +158,7 @@ int main() {
 
   auto gb8 = gb7.substr(gb7.begin() + 2, gb7.end());
   print_gb("gb8", gb8);
+
+  gap_buffer<char> gb9(0);
+  
 }
