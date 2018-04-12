@@ -137,7 +137,7 @@ TEST_CASE("Gapbuffer are initialized", "[gapbuffer]") {
     CHECK(gb7.capacity() >= 100);
   }
 
-  SECTION("access") {
+  SECTION("Access and more") {
     dr::gap_buffer<char> gb8{'a', 'b', 'c'};
     CHECK(gb8.at(1) == 'b');
     CHECK_THROWS(gb8.at(10));
