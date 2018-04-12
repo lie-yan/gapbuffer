@@ -108,7 +108,49 @@ TEST_CASE("Gapbuffer are initialized", "[gapbuffer]") {
 
   SECTION("Insertion and deletion") {
     dr::gap_buffer<char> gb6({'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'});
-    
+    gb6.erase(gb6.begin() + 3, gb6.begin()+6);
+    CHECK(gb6.size() == 6);
+    CHECK(gb6[0] == 'a');
+    CHECK(gb6[1] == 'b');
+    CHECK(gb6[2] == 'c');
+    CHECK(gb6[3] == 'g');
+    CHECK(gb6[4] == 'h');
+    CHECK(gb6[5] == 'i');
+
+    std::string s("xyz");
+    gb6.insert(gb6.begin(), s.begin(), s.end());
+    CHECK(gb6.size() == 9);
+    CHECK(gb6[0] == 'x');
+    CHECK(gb6[1] == 'y');
+    CHECK(gb6[2] == 'z');
+    CHECK(gb6[3] == 'a');
+    CHECK(gb6[4] == 'b');
+    CHECK(gb6[5] == 'c');
+    CHECK(gb6[6] == 'g');
+    CHECK(gb6[7] == 'h');
+    CHECK(gb6[8] == 'i');
+  }
+
+  SECTION("Reserve") {
+    dr::gap_buffer<char> gb7;
+    gb7.reserve(100);
+    CHECK(gb7.capacity() >= 100);
+  }
+
+  SECTION("access") {
+    dr::gap_buffer<char> gb8{'a', 'b', 'c'};
+    CHECK(gb8.at(1) == 'b');
+    CHECK_THROWS(gb8.at(10));
+
+    CHECK(gb8.front() == 'a');
+    CHECK(gb8.back() == 'c');
+    CHECK(! gb8.empty());
+
+    gb8.resize(4, 'd');
+    CHECK(gb8.back() == 'd');
+
+    gb8.clear();
+    CHECK(gb8.empty());
   }
 
 }
